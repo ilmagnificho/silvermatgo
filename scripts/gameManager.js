@@ -52,6 +52,7 @@ export class GameManager {
         this.onCardCollected = null;
         this.onGoStopPrompt = null;
         this.onGameOver = null;
+        this.onNoMatchingCards = null; // 매칭 카드 없음 이벤트
     }
     
     // 새 게임 시작
@@ -177,12 +178,22 @@ export class GameManager {
             cards.splice(cardIndex, 1);
         }
         
+        // 카드 수집 처리를 위한 정보
+        let collectionInfo = {
+            cardPlayed: playerCard,
+            cardsCollected: [],
+            specialAction: null
+        };
+        
         // 바닥에서 매칭되는 카드 제거하고 수집
         if (boardCard) {
             const boardIndex = this.state.boardCards.findIndex(c => c === boardCard);
             if (boardIndex !== -1) {
                 this.state.boardCards.splice(boardIndex, 1);
             }
+            
+            // 수집할 카드 기록
+            collectionInfo.cardsCollected.push(boardCard);
             
             // 카드 타입에 따라 분류하여 수집
             this.collectCard(collected, boardCard);
@@ -192,18 +203,44 @@ export class GameManager {
             this.state.boardCards.push(playerCard);
         }
         
+        // 쌍 체크 (같은 패가 바닥에 2장 있는 경우)
+        if (boardCard) {
+            const sameMonthCards = this.state.boardCards.filter(c => c.month === playerCard.month);
+            if (sameMonthCards.length > 0) {
+                // 추가 수집 처리
+                sameMonthCards.forEach(card => {
+                    const idx = this.state.boardCards.indexOf(card);
+                    if (idx !== -1) {
+                        this.state.boardCards.splice(idx, 1);
+                        this.collectCard(collected, card);
+                        collectionInfo.cardsCollected.push(card);
+                    }
+                });
+                
+                // 쌍 효과 발동
+                collectionInfo.specialAction = {
+                    type: 'ssang',
+                    message: '쌍! 같은 월의 카드를 모두 가져갔습니다.'
+                };
+            }
+        }
+        
         // 특수 조합 체크 (쪽, 따닥, 폭탄 등)
-        this.checkSpecialCombinations(player);
+        const specialAction = this.checkSpecialCombinations(player);
+        if (specialAction) {
+            collectionInfo.specialAction = specialAction;
+        }
         
         // 점수 계산
         this.calculateScore();
         
-        // 카드 플레이 이벤트 발생
+        // 카드 플레이 이벤트 발생 (수정: 수집 정보 추가)
         if (this.onCardPlayed) {
             this.onCardPlayed({
                 player,
                 playedCard: playerCard,
                 collectedCard: boardCard,
+                collectionInfo: collectionInfo,
                 state: this.state
             });
         }
@@ -341,6 +378,67 @@ export class GameManager {
         }
     }
     
+    // 카드 버리기 기능
+    discardCard(cardIndex) {
+        if (this.state.phase !== 'playerTurn') return false;
+        
+        // 플레이어의 손에서 카드 가져오기
+        const card = this.state.playerCards[cardIndex];
+        
+        if (!card) return false;
+        
+        // 플레이어의 손에서 카드 제거
+        this.state.playerCards.splice(cardIndex, 1);
+        
+        // 바닥에 카드 추가
+        this.state.boardCards.push(card);
+        
+        // 카드 플레이 이벤트 발생
+        if (this.onCardPlayed) {
+            this.onCardPlayed({
+                player: 'player',
+                playedCard: card,
+                collectedCard: null,
+                state: this.state,
+                collectionInfo: {
+                    cardPlayed: card,
+                    cardsCollected: [],
+                    specialAction: null
+                },
+                action: 'discard'
+            });
+        }
+        
+        // 덱에서 새 카드 뽑기
+        if (this.deck.remainingCards() > 0) {
+            const newCard = this.deck.drawCard();
+            this.state.playerCards.push(newCard);
+        }
+        
+        // 게임 종료 조건 체크
+        if (this.checkGameOver()) {
+            return true;
+        }
+        
+        // 턴 전환
+        this.state.isPlayerTurn = false;
+        this.state.phase = 'aiTurn';
+        this.state.selectedCard = null;
+        this.state.matchingCards = [];
+        
+        // 상태 변경 알림
+        if (this.onGameStateChanged) {
+            this.onGameStateChanged(this.state);
+        }
+        
+        // AI 턴 시작
+        setTimeout(() => {
+            this.startAITurn();
+        }, 1000);
+        
+        return true;
+    }
+    
     // 게임 종료 체크
     checkGameOver() {
         // 모든 카드를 다 썼거나, 플레이어/AI의 패가 없는 경우
@@ -393,9 +491,22 @@ export class GameManager {
     findMatchingCards(card) {
         if (!card) return [];
         
-        return this.state.boardCards.filter(boardCard => 
+        const matchingCards = this.state.boardCards.filter(boardCard => 
             boardCard.month === card.month
         );
+        
+        // 매칭 카드가 없을 때 UI에 알림 기능 추가
+        if (matchingCards.length === 0 && this.state.isPlayerTurn) {
+            // 매칭 카드 없음 이벤트 발생 (새로 추가)
+            if (this.onNoMatchingCards) {
+                this.onNoMatchingCards({
+                    selectedCard: card,
+                    state: this.state
+                });
+            }
+        }
+        
+        return matchingCards;
     }
     
     // 카드 수집
@@ -421,8 +532,82 @@ export class GameManager {
     
     // 특수 조합 체크 (쪽, 따닥, 폭탄 등)
     checkSpecialCombinations(player) {
-        // 여기서는 간단한 구현만 포함
-        // 실제 구현에서는 더 복잡한 규칙 적용 필요
+        const collected = player === 'player' ? this.state.playerCollected : this.state.aiCollected;
+        
+        // 광 조합 체크
+        const kwangCount = collected.kwang.length;
+        if (kwangCount === 3) {
+            // 3광
+            return {
+                type: 'threeLights',
+                message: '3광을 모았습니다! 3점 획득',
+                points: 3
+            };
+        } else if (kwangCount === 4) {
+            // 4광
+            return {
+                type: 'fourLights',
+                message: '4광을 모았습니다! 4점 획득',
+                points: 4
+            };
+        } else if (kwangCount === 5) {
+            // 5광
+            return {
+                type: 'fiveLights',
+                message: '5광을 모았습니다! 15점 획득',
+                points: 15
+            };
+        }
+        
+        // 띠 조합 체크 (동물)
+        const animalCount = collected.animal.length;
+        if (animalCount === 5) {
+            return {
+                type: 'fiveAnimals',
+                message: '띠 5장을 모았습니다! 1점 획득',
+                points: 1
+            };
+        } else if (animalCount === 10) {
+            return {
+                type: 'tenAnimals',
+                message: '띠 10장을 모았습니다! 2점 획득',
+                points: 2
+            };
+        }
+        
+        // 열끗 조합 체크 (리본)
+        const ribbonCount = collected.ribbon.length;
+        if (ribbonCount === 5) {
+            return {
+                type: 'fiveRibbons',
+                message: '열끗 5장을 모았습니다! 1점 획득',
+                points: 1
+            };
+        } else if (ribbonCount === 10) {
+            return {
+                type: 'tenRibbons',
+                message: '열끗 10장을 모았습니다! 2점 획득',
+                points: 2
+            };
+        }
+        
+        // 피 조합 체크
+        const junkCount = collected.junk.length;
+        if (junkCount === 10) {
+            return {
+                type: 'tenJunks',
+                message: '피 10장을 모았습니다! 1점 획득',
+                points: 1
+            };
+        } else if (junkCount === 20) {
+            return {
+                type: 'twentyJunks',
+                message: '피 20장을 모았습니다! 2점 획득',
+                points: 2
+            };
+        }
+        
+        return null;
     }
     
     // 점수 계산
