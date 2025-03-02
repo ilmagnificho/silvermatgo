@@ -14,6 +14,22 @@ export class UIManager {
             'tutorial-screen': document.getElementById('tutorial-screen'),
             'settings-screen': document.getElementById('settings-screen')
         };
+        
+        this.boardCardsElement = document.getElementById('board-cards');
+        this.playerCardsElement = document.getElementById('player-cards');
+        this.opponentCardsElement = document.querySelector('.opponent-cards');
+        this.gameStatusElement = document.getElementById('game-status');
+        this.playerScoreElement = document.getElementById('player-score');
+        this.aiScoreElement = document.getElementById('ai-score');
+        this.goStopDialog = document.getElementById('go-stop-dialog');
+        this.currentPointsElement = document.getElementById('current-points');
+        this.countdownElement = document.getElementById('countdown-timer');
+        
+        // 게임 매니저 이벤트 연결
+        this.initGameEvents();
+        
+        // 카드 이벤트 리스너
+        this.selectedCardIndex = -1;
     }
     
     // 게임 결과 화면 표시
@@ -53,15 +69,21 @@ export class UIManager {
     showScreen(screenId) {
         // 모든 화면 숨기기
         Object.values(this.screenElements).forEach(element => {
-            element.classList.remove('active');
+            if (element) {
+                element.classList.remove('active');
+            }
         });
         
         // 지정된 화면 표시
-        this.screenElements[screenId].classList.add('active');
+        if (this.screenElements[screenId]) {
+            this.screenElements[screenId].classList.add('active');
+        }
     }
     
     // 플레이어 카드 활성화/비활성화
     enablePlayerCards(enabled) {
+        if (!this.playerCardsElement) return;
+        
         const playerCards = this.playerCardsElement.querySelectorAll('.player-card');
         
         playerCards.forEach(card => {
@@ -72,94 +94,98 @@ export class UIManager {
             }
         });
     }
-}
-        
-        this.boardCardsElement = document.getElementById('board-cards');
-        this.playerCardsElement = document.getElementById('player-cards');
-        this.opponentCardsElement = document.querySelector('.opponent-cards');
-        this.gameStatusElement = document.getElementById('game-status');
-        this.playerScoreElement = document.getElementById('player-score');
-        this.aiScoreElement = document.getElementById('ai-score');
-        this.goStopDialog = document.getElementById('go-stop-dialog');
-        this.currentPointsElement = document.getElementById('current-points');
-        this.countdownElement = document.getElementById('countdown-timer');
-        
-        // 게임 매니저 이벤트 연결
-        this.initGameEvents();
-        
-        // 카드 이벤트 리스너
-        this.selectedCardIndex = -1;
-    }
     
     // 게임 매니저 이벤트 초기화
     initGameEvents() {
-        this.gameManager.onGameStateChanged = (state) => {
-            this.updateGameUI(state);
-        };
-        
-        this.gameManager.onCardsDealt = (state) => {
-            this.renderGameBoard(state);
-        };
-        
-        this.gameManager.onPlayerTurn = () => {
-            this.gameStatusElement.textContent = '당신의 차례';
-        };
-        
-        this.gameManager.onAITurn = (data) => {
-            this.gameStatusElement.textContent = 'AI 차례';
-            this.highlightAICard(data.card);
-        };
-        
-        this.gameManager.onCardPlayed = (data) => {
-            this.renderGameBoard(data.state);
+        if (this.gameManager) {
+            this.gameManager.onGameStateChanged = (state) => {
+                this.updateGameUI(state);
+            };
             
-            // 특수 효과 (쪽, 따닥 등) 표시
-            if (data.lastAction) {
-                this.showSpecialEffect(data.lastAction);
-            }
-        };
-        
-        this.gameManager.onGoStopPrompt = (data) => {
-            this.showGoStopDialog(data.currentPoints);
-        };
-        
-        this.gameManager.onGameOver = (result) => {
-            this.showGameResult(result);
-        };
+            this.gameManager.onCardsDealt = (state) => {
+                this.renderGameBoard(state);
+            };
+            
+            this.gameManager.onPlayerTurn = () => {
+                if (this.gameStatusElement) {
+                    this.gameStatusElement.textContent = '당신의 차례';
+                }
+            };
+            
+            this.gameManager.onAITurn = (data) => {
+                if (this.gameStatusElement) {
+                    this.gameStatusElement.textContent = 'AI 차례';
+                }
+                this.highlightAICard(data.card);
+            };
+            
+            this.gameManager.onCardPlayed = (data) => {
+                this.renderGameBoard(data.state);
+                
+                // 특수 효과 (쪽, 따닥 등) 표시
+                if (data.lastAction) {
+                    this.showSpecialEffect(data.lastAction);
+                }
+            };
+            
+            this.gameManager.onGoStopPrompt = (data) => {
+                this.showGoStopDialog(data.currentPoints);
+            };
+            
+            this.gameManager.onGameOver = (result) => {
+                this.showGameResult(result);
+            };
+        }
     }
     
     // 게임 UI 업데이트
     updateGameUI(state) {
         // 게임 상태에 따른 UI 업데이트
+        if (!state) return;
+        
         switch (state.phase) {
             case 'playerTurn':
-                this.gameStatusElement.textContent = '당신의 차례';
+                if (this.gameStatusElement) {
+                    this.gameStatusElement.textContent = '당신의 차례';
+                }
                 this.enablePlayerCards(true);
                 break;
                 
             case 'aiTurn':
-                this.gameStatusElement.textContent = 'AI 차례';
+                if (this.gameStatusElement) {
+                    this.gameStatusElement.textContent = 'AI 차례';
+                }
                 this.enablePlayerCards(false);
                 break;
                 
             case 'goStop':
-                this.gameStatusElement.textContent = '고 / 스톱 선택';
+                if (this.gameStatusElement) {
+                    this.gameStatusElement.textContent = '고 / 스톱 선택';
+                }
                 this.enablePlayerCards(false);
                 break;
                 
             case 'gameOver':
-                this.gameStatusElement.textContent = '게임 종료';
+                if (this.gameStatusElement) {
+                    this.gameStatusElement.textContent = '게임 종료';
+                }
                 this.enablePlayerCards(false);
                 break;
         }
         
         // 점수 업데이트
-        this.playerScoreElement.textContent = state.playerScore;
-        this.aiScoreElement.textContent = state.aiScore;
+        if (this.playerScoreElement) {
+            this.playerScoreElement.textContent = state.playerScore;
+        }
+        if (this.aiScoreElement) {
+            this.aiScoreElement.textContent = state.aiScore;
+        }
     }
     
     // 게임 보드 렌더링
     renderGameBoard(state) {
+        if (!state) return;
+        
         // 바닥 카드 렌더링
         this.renderBoardCards(state.boardCards);
         
@@ -172,6 +198,8 @@ export class UIManager {
     
     // 바닥 카드 렌더링
     renderBoardCards(boardCards) {
+        if (!this.boardCardsElement || !boardCards) return;
+        
         this.boardCardsElement.innerHTML = '';
         
         boardCards.forEach(card => {
@@ -182,6 +210,8 @@ export class UIManager {
     
     // 플레이어 카드 렌더링
     renderPlayerCards(playerCards) {
+        if (!this.playerCardsElement || !playerCards) return;
+        
         this.playerCardsElement.innerHTML = '';
         this.selectedCardIndex = -1;
         
@@ -199,6 +229,8 @@ export class UIManager {
     
     // AI 카드 렌더링 (뒷면)
     renderAICards(cardCount) {
+        if (!this.opponentCardsElement) return;
+        
         this.opponentCardsElement.innerHTML = '';
         
         for (let i = 0; i < cardCount; i++) {
@@ -210,6 +242,8 @@ export class UIManager {
     
     // 카드 요소 생성
     createCardElement(card, isPlayer) {
+        if (!card) return document.createElement('div');
+        
         const cardElement = document.createElement('div');
         cardElement.className = 'card';
         cardElement.dataset.id = card.id;
@@ -245,6 +279,8 @@ export class UIManager {
     
     // 플레이어 카드 선택
     selectPlayerCard(index) {
+        if (!this.playerCardsElement || !this.gameManager) return;
+        
         // 게임 상태가 플레이어 턴이 아니면 무시
         if (this.gameManager.getCurrentState().phase !== 'playerTurn') {
             return;
@@ -260,7 +296,9 @@ export class UIManager {
             this.selectedCardIndex = -1;
         } else {
             // 새 카드 선택
-            playerCards[index].classList.add('selected');
+            if (playerCards[index]) {
+                playerCards[index].classList.add('selected');
+            }
             this.selectedCardIndex = index;
             
             // 게임 매니저에 선택 알림
@@ -273,7 +311,7 @@ export class UIManager {
     
     // 바닥 카드 선택
     selectBoardCard(card) {
-        if (this.selectedCardIndex === -1) return;
+        if (this.selectedCardIndex === -1 || !this.gameManager || !card) return;
         
         // 게임 매니저에게 카드 선택 전달
         const boardCards = this.gameManager.getCurrentState().boardCards;
@@ -287,21 +325,25 @@ export class UIManager {
                 this.selectedCardIndex = -1;
                 
                 // 하이라이트 제거
-                const boardCardElements = this.boardCardsElement.querySelectorAll('.card');
-                boardCardElements.forEach(card => card.classList.remove('highlight'));
+                if (this.boardCardsElement) {
+                    const boardCardElements = this.boardCardsElement.querySelectorAll('.card');
+                    boardCardElements.forEach(card => card.classList.remove('highlight'));
+                }
             }
         }
     }
     
     // 매칭되는 바닥 카드 하이라이트
     highlightMatchingCards() {
+        if (!this.boardCardsElement || !this.gameManager) return;
+        
         // 모든 하이라이트 제거
         const boardCardElements = this.boardCardsElement.querySelectorAll('.card');
         boardCardElements.forEach(card => card.classList.remove('highlight'));
         
         // 현재 게임 상태 및 선택된 카드 가져오기
         const state = this.gameManager.getCurrentState();
-        if (!state.selectedCard) return;
+        if (!state || !state.selectedCard) return;
         
         // 선택된 카드와 같은 월을 가진 바닥 카드 하이라이트
         boardCardElements.forEach(cardElement => {
@@ -313,6 +355,8 @@ export class UIManager {
     
     // AI 카드 하이라이트 (AI 턴에 사용)
     highlightAICard(card) {
+        if (!this.opponentCardsElement) return;
+        
         // AI 카드는 뒷면으로만 표시되므로 실제로 하이라이트할 수 없음
         // 하지만 애니메이션 효과를 위해 임의의 카드를 하이라이트
         const aiCardElements = this.opponentCardsElement.querySelectorAll('.card');
@@ -331,6 +375,9 @@ export class UIManager {
     
     // 고/스톱 다이얼로그 표시
     showGoStopDialog(currentPoints) {
+        if (!this.goStopDialog || !this.currentPointsElement || 
+            !this.countdownElement || !this.gameManager) return;
+        
         this.currentPointsElement.textContent = currentPoints;
         this.goStopDialog.classList.remove('hidden');
         
@@ -351,12 +398,23 @@ export class UIManager {
         }, 1000);
         
         // 버튼 클릭 시 타이머 정지
-        document.getElementById('go-btn').onclick = () => {
-            clearInterval(timer);
-            this.goStopDialog.classList.add('hidden');
-        };
+        const goBtn = document.getElementById('go-btn');
+        const stopBtn = document.getElementById('stop-btn');
         
-        document.getElementById('stop-btn').onclick = () => {
-            clearInterval(timer);
-            this.goStopDialog.classList.add('hidden');
-        };
+        if (goBtn) {
+            goBtn.onclick = () => {
+                clearInterval(timer);
+                this.goStopDialog.classList.add('hidden');
+                this.gameManager.selectGoStop('go');
+            };
+        }
+        
+        if (stopBtn) {
+            stopBtn.onclick = () => {
+                clearInterval(timer);
+                this.goStopDialog.classList.add('hidden');
+                this.gameManager.selectGoStop('stop');
+            };
+        }
+    }
+}
