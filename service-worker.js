@@ -1,35 +1,36 @@
 // service-worker.js - 오프라인 지원 및 PWA 기능
 const CACHE_NAME = 'silver-matgo-v1';
 
-// 캐시할 항목 목록
+// 캐시할 항목 목록 (상대 경로로 수정)
 const CACHE_ASSETS = [
-    '/', // 기본 페이지
-    '/index.html',
-    '/styles.css',
-    '/scripts/app.js',
-    '/scripts/gameManager.js',
-    '/scripts/uiManager.js',
-    '/scripts/cardDeck.js',
-    '/scripts/aiPlayer.js',
-    '/scripts/settingsManager.js',
-    '/scripts/soundManager.js',
-    '/scripts/tutorialManager.js',
-    '/manifest.json',
-    '/offline.html',
-    '/images/logo.svg',
-    '/images/icons/icon-192x192.png',
-    '/images/icons/icon-512x512.png',
-    '/images/tutorial/basic-rules.svg',
-    '/images/tutorial/card-selection.svg',
-    '/images/tutorial/scoring.svg',
-    '/images/tutorial/special-rules.svg',
-    '/sounds/card_select.mp3',
-    '/sounds/card_match.mp3',
-    '/sounds/card_place.mp3',
-    '/sounds/go_stop.mp3',
-    '/sounds/win.mp3',
-    '/sounds/lose.mp3',
-    '/sounds/special.mp3'
+    './', // 기본 페이지
+    './index.html',
+    './styles.css',
+    './scripts/app.js',
+    './scripts/gameManager.js',
+    './scripts/uiManager.js',
+    './scripts/cardDeck.js',
+    './scripts/aiPlayer.js',
+    './scripts/settingsManager.js',
+    './scripts/soundManager.js',
+    './scripts/tutorialManager.js',
+    './manifest.json',
+    './offline.html',
+    './images/logo.svg',
+    './images/icons/icon-192x192.png',
+    './images/icons/icon-512x512.png',
+    './images/tutorial/basic-rules.svg',
+    './images/tutorial/card-selection.svg',
+    './images/tutorial/scoring.svg',
+    './images/tutorial/special-rules.svg'
+    // 소리 파일은 실제로 존재하는지 확인 후 추가 (임시로 제거)
+    // './sounds/card_select.mp3',
+    // './sounds/card_match.mp3',
+    // './sounds/card_place.mp3',
+    // './sounds/go_stop.mp3',
+    // './sounds/win.mp3',
+    // './sounds/lose.mp3',
+    // './sounds/special.mp3'
 ];
 
 // 서비스 워커 설치 및 캐시 설정
@@ -56,17 +57,17 @@ self.addEventListener('activate', (event) => {
     event.waitUntil(
         caches.keys().then((cacheNames) => {
             return Promise.all(
-                cacheNames.map((cacheName) => {
-                    if (cacheName !== CACHE_NAME) {
+                cacheNames.filter(cacheName => cacheName !== CACHE_NAME)
+                    .map(cacheName => {
                         console.log('이전 캐시 삭제:', cacheName);
                         return caches.delete(cacheName);
-                    }
-                })
+                    })
             );
         })
+        .then(() => self.clients.claim()) // 모든 클라이언트에 대한 제어권 획득
     );
     
-    return self.clients.claim(); // 모든 클라이언트에 대한 제어권 획득
+    return self.clients.claim();
 });
 
 // 네트워크 요청 인터셉트 및 캐시 사용
@@ -96,7 +97,11 @@ async function cacheFirst(request) {
         // 유효한 응답인 경우 캐시에 저장
         if (networkResponse && networkResponse.status === 200) {
             const cache = await caches.open(CACHE_NAME);
-            cache.put(request, networkResponse.clone());
+            try {
+                cache.put(request, networkResponse.clone());
+            } catch (error) {
+                console.error('캐시 저장 실패:', error);
+            }
         }
         
         return networkResponse;
@@ -106,10 +111,16 @@ async function cacheFirst(request) {
         // 오프라인 폴백 페이지 (옵션)
         if (request.mode === 'navigate') {
             const cache = await caches.open(CACHE_NAME);
-            return cache.match('/offline.html');
+            const offlineResponse = await cache.match('./offline.html');
+            if (offlineResponse) {
+                return offlineResponse;
+            }
         }
         
-        return new Response('네트워크 오류 발생', { status: 408, headers: { 'Content-Type': 'text/plain' } });
+        return new Response('네트워크 오류 발생', { 
+            status: 408, 
+            headers: { 'Content-Type': 'text/plain' } 
+        });
     }
 }
 
@@ -122,7 +133,11 @@ async function networkFirst(request) {
         // 유효한 응답인 경우 캐시에 저장
         if (networkResponse && networkResponse.status === 200) {
             const cache = await caches.open(CACHE_NAME);
-            cache.put(request, networkResponse.clone());
+            try {
+                cache.put(request, networkResponse.clone());
+            } catch (error) {
+                console.error('캐시 저장 실패:', error);
+            }
         }
         
         return networkResponse;
@@ -138,9 +153,15 @@ async function networkFirst(request) {
         // 오프라인 폴백 페이지 (옵션)
         if (request.mode === 'navigate') {
             const cache = await caches.open(CACHE_NAME);
-            return cache.match('/offline.html');
+            const offlineResponse = await cache.match('./offline.html');
+            if (offlineResponse) {
+                return offlineResponse;
+            }
         }
         
-        return new Response('네트워크 오류 발생', { status: 408, headers: { 'Content-Type': 'text/plain' } });
+        return new Response('네트워크 오류 발생', { 
+            status: 408, 
+            headers: { 'Content-Type': 'text/plain' } 
+        });
     }
 }
