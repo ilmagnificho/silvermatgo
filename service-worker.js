@@ -15,6 +15,7 @@ const CACHE_ASSETS = [
     '/scripts/soundManager.js',
     '/scripts/tutorialManager.js',
     '/manifest.json',
+    '/offline.html',
     '/images/logo.svg',
     '/images/icons/icon-192x192.png',
     '/images/icons/icon-512x512.png',
@@ -100,30 +101,6 @@ async function cacheFirst(request) {
         
         return networkResponse;
     } catch (error) {
-        console.error('네트워크 우선 전략 실패:', error);
-        
-        // 캐시에서 폴백 응답 시도
-        const cachedResponse = await caches.match(request);
-        if (cachedResponse) {
-            return cachedResponse;
-        }
-        
-        // 오프라인 폴백 페이지 (옵션)
-        if (request.mode === 'navigate') {
-            const cache = await caches.open(CACHE_NAME);
-            return cache.match('/offline.html');
-        }
-        
-        return new Response('네트워크 오류 발생', { status: 408, headers: { 'Content-Type': 'text/plain' } });
-    }
-} 경우 캐시에 저장
-        if (networkResponse && networkResponse.status === 200) {
-            const cache = await caches.open(CACHE_NAME);
-            cache.put(request, networkResponse.clone());
-        }
-        
-        return networkResponse;
-    } catch (error) {
         console.error('캐시 우선 전략 실패:', error);
         
         // 오프라인 폴백 페이지 (옵션)
@@ -142,4 +119,28 @@ async function networkFirst(request) {
         // 네트워크 요청 시도
         const networkResponse = await fetch(request);
         
-        // 유효한 응답인
+        // 유효한 응답인 경우 캐시에 저장
+        if (networkResponse && networkResponse.status === 200) {
+            const cache = await caches.open(CACHE_NAME);
+            cache.put(request, networkResponse.clone());
+        }
+        
+        return networkResponse;
+    } catch (error) {
+        console.error('네트워크 우선 전략 실패:', error);
+        
+        // 캐시에서 폴백 응답 시도
+        const cachedResponse = await caches.match(request);
+        if (cachedResponse) {
+            return cachedResponse;
+        }
+        
+        // 오프라인 폴백 페이지 (옵션)
+        if (request.mode === 'navigate') {
+            const cache = await caches.open(CACHE_NAME);
+            return cache.match('/offline.html');
+        }
+        
+        return new Response('네트워크 오류 발생', { status: 408, headers: { 'Content-Type': 'text/plain' } });
+    }
+}
