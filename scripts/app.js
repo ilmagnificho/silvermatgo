@@ -7,7 +7,8 @@ import { TutorialManager } from './tutorialManager.js';
 // PWA 관련 서비스 워커 등록
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/service-worker.js')
+        // 상대 경로 사용으로 수정
+        navigator.serviceWorker.register('./service-worker.js')
             .then(registration => {
                 console.log('ServiceWorker 등록 성공:', registration.scope);
             })
@@ -38,68 +39,105 @@ class App {
     // 이벤트 리스너 초기화
     initEventListeners() {
         // 시작 화면 버튼
-        document.getElementById('start-game').addEventListener('click', () => {
-            this.uiManager.showScreen('game-screen');
-            this.gameManager.startNewGame();
-        });
+        const startGameBtn = document.getElementById('start-game');
+        if (startGameBtn) {
+            startGameBtn.addEventListener('click', () => {
+                this.uiManager.showScreen('game-screen');
+                this.gameManager.startNewGame();
+            });
+        }
         
-        document.getElementById('open-tutorial').addEventListener('click', () => {
-            this.uiManager.showScreen('tutorial-screen');
-        });
+        const openTutorialBtn = document.getElementById('open-tutorial');
+        if (openTutorialBtn) {
+            openTutorialBtn.addEventListener('click', () => {
+                this.uiManager.showScreen('tutorial-screen');
+            });
+        }
         
-        document.getElementById('open-settings').addEventListener('click', () => {
-            this.uiManager.showScreen('settings-screen');
-        });
+        const openSettingsBtn = document.getElementById('open-settings');
+        if (openSettingsBtn) {
+            openSettingsBtn.addEventListener('click', () => {
+                this.uiManager.showScreen('settings-screen');
+            });
+        }
         
         // 게임 화면 버튼
-        document.getElementById('back-to-menu').addEventListener('click', () => {
-            if (confirm('게임을 종료하시겠습니까? 현재 게임은 저장되지 않습니다.')) {
-                this.uiManager.showScreen('start-screen');
-            }
-        });
+        const backToMenuBtn = document.getElementById('back-to-menu');
+        if (backToMenuBtn) {
+            backToMenuBtn.addEventListener('click', () => {
+                if (confirm('게임을 종료하시겠습니까? 현재 게임은 저장되지 않습니다.')) {
+                    this.uiManager.showScreen('start-screen');
+                }
+            });
+        }
         
-        document.getElementById('game-help').addEventListener('click', () => {
-            this.tutorialManager.showContextHelp(this.gameManager.getCurrentState());
-        });
+        const gameHelpBtn = document.getElementById('game-help');
+        if (gameHelpBtn) {
+            gameHelpBtn.addEventListener('click', () => {
+                this.tutorialManager.showContextHelp(this.gameManager.getCurrentState());
+            });
+        }
         
         // 고/스톱 다이얼로그 버튼
-        document.getElementById('go-btn').addEventListener('click', () => {
-            this.gameManager.selectGoStop('go');
-        });
+        const goBtn = document.getElementById('go-btn');
+        if (goBtn) {
+            goBtn.addEventListener('click', () => {
+                this.gameManager.selectGoStop('go');
+            });
+        }
         
-        document.getElementById('stop-btn').addEventListener('click', () => {
-            this.gameManager.selectGoStop('stop');
-        });
+        const stopBtn = document.getElementById('stop-btn');
+        if (stopBtn) {
+            stopBtn.addEventListener('click', () => {
+                this.gameManager.selectGoStop('stop');
+            });
+        }
         
         // 결과 화면 버튼
-        document.getElementById('play-again').addEventListener('click', () => {
-            this.uiManager.showScreen('game-screen');
-            this.gameManager.startNewGame();
-        });
+        const playAgainBtn = document.getElementById('play-again');
+        if (playAgainBtn) {
+            playAgainBtn.addEventListener('click', () => {
+                this.uiManager.showScreen('game-screen');
+                this.gameManager.startNewGame();
+            });
+        }
         
-        document.getElementById('return-to-menu').addEventListener('click', () => {
-            this.uiManager.showScreen('start-screen');
-        });
+        const returnToMenuBtn = document.getElementById('return-to-menu');
+        if (returnToMenuBtn) {
+            returnToMenuBtn.addEventListener('click', () => {
+                this.uiManager.showScreen('start-screen');
+            });
+        }
         
-        document.getElementById('share-result').addEventListener('click', () => {
-            this.shareGameResult();
-        });
+        const shareResultBtn = document.getElementById('share-result');
+        if (shareResultBtn) {
+            shareResultBtn.addEventListener('click', () => {
+                this.shareGameResult();
+            });
+        }
         
         // 튜토리얼 화면 버튼
-        document.getElementById('close-tutorial').addEventListener('click', () => {
-            this.uiManager.showScreen('start-screen');
-        });
+        const closeTutorialBtn = document.getElementById('close-tutorial');
+        if (closeTutorialBtn) {
+            closeTutorialBtn.addEventListener('click', () => {
+                this.uiManager.showScreen('start-screen');
+            });
+        }
         
         const prevBtn = document.getElementById('prev-step');
         const nextBtn = document.getElementById('next-step');
         
-        prevBtn.addEventListener('click', () => {
-            this.tutorialManager.prevStep();
-        });
+        if (prevBtn) {
+            prevBtn.addEventListener('click', () => {
+                this.tutorialManager.prevStep();
+            });
+        }
         
-        nextBtn.addEventListener('click', () => {
-            this.tutorialManager.nextStep();
-        });
+        if (nextBtn) {
+            nextBtn.addEventListener('click', () => {
+                this.tutorialManager.nextStep();
+            });
+        }
         
         // 튜토리얼 단계 선택 도트
         document.querySelectorAll('.dot').forEach(dot => {
@@ -110,56 +148,89 @@ class App {
         });
         
         // 설정 화면 버튼
-        document.getElementById('close-settings').addEventListener('click', () => {
-            this.uiManager.showScreen('start-screen');
-            this.settingsManager.saveSettings();
-        });
+        const closeSettingsBtn = document.getElementById('close-settings');
+        if (closeSettingsBtn) {
+            closeSettingsBtn.addEventListener('click', () => {
+                this.uiManager.showScreen('start-screen');
+                this.settingsManager.saveSettings();
+            });
+        }
         
         // 설정 변경 이벤트
-        document.getElementById('difficulty').addEventListener('change', (e) => {
-            this.settingsManager.updateSetting('difficulty', e.target.value);
-        });
+        const difficultySelect = document.getElementById('difficulty');
+        if (difficultySelect) {
+            difficultySelect.addEventListener('change', (e) => {
+                this.settingsManager.updateSetting('difficulty', e.target.value);
+            });
+        }
         
-        document.getElementById('text-size').addEventListener('change', (e) => {
-            this.settingsManager.updateSetting('textSize', e.target.value);
-            this.applyTextSize(e.target.value);
-        });
+        const textSizeSelect = document.getElementById('text-size');
+        if (textSizeSelect) {
+            textSizeSelect.addEventListener('change', (e) => {
+                this.settingsManager.updateSetting('textSize', e.target.value);
+                this.applyTextSize(e.target.value);
+            });
+        }
         
-        document.getElementById('sound-effect').addEventListener('change', (e) => {
-            this.settingsManager.updateSetting('soundEffect', e.target.checked);
-        });
+        const soundEffectToggle = document.getElementById('sound-effect');
+        if (soundEffectToggle) {
+            soundEffectToggle.addEventListener('change', (e) => {
+                this.settingsManager.updateSetting('soundEffect', e.target.checked);
+            });
+        }
         
-        document.getElementById('vibration').addEventListener('change', (e) => {
-            this.settingsManager.updateSetting('vibration', e.target.checked);
-        });
+        const vibrationToggle = document.getElementById('vibration');
+        if (vibrationToggle) {
+            vibrationToggle.addEventListener('change', (e) => {
+                this.settingsManager.updateSetting('vibration', e.target.checked);
+            });
+        }
         
-        document.getElementById('high-contrast').addEventListener('change', (e) => {
-            this.settingsManager.updateSetting('highContrast', e.target.checked);
-            this.applyHighContrast(e.target.checked);
-        });
+        const highContrastToggle = document.getElementById('high-contrast');
+        if (highContrastToggle) {
+            highContrastToggle.addEventListener('change', (e) => {
+                this.settingsManager.updateSetting('highContrast', e.target.checked);
+                this.applyHighContrast(e.target.checked);
+            });
+        }
         
-        document.getElementById('tutorial-reset').addEventListener('click', () => {
-            this.tutorialManager.resetTutorial();
-            alert('튜토리얼이 초기화되었습니다. 다음 게임부터 다시 보게 됩니다.');
-        });
+        const tutorialResetBtn = document.getElementById('tutorial-reset');
+        if (tutorialResetBtn) {
+            tutorialResetBtn.addEventListener('click', () => {
+                this.tutorialManager.resetTutorial();
+                alert('튜토리얼이 초기화되었습니다. 다음 게임부터 다시 보게 됩니다.');
+            });
+        }
         
-        document.getElementById('clear-data').addEventListener('click', () => {
-            if (confirm('모든 게임 데이터를 초기화하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
-                this.settingsManager.clearAllData();
-                alert('모든 데이터가 초기화되었습니다.');
-                window.location.reload();
-            }
-        });
+        const clearDataBtn = document.getElementById('clear-data');
+        if (clearDataBtn) {
+            clearDataBtn.addEventListener('click', () => {
+                if (confirm('모든 게임 데이터를 초기화하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
+                    this.settingsManager.clearAllData();
+                    alert('모든 데이터가 초기화되었습니다.');
+                    window.location.reload();
+                }
+            });
+        }
         
         // 설치 배너 관련
-        document.getElementById('install-btn').addEventListener('click', () => {
-            this.installApp();
-        });
+        const installBtn = document.getElementById('install-btn');
+        if (installBtn) {
+            installBtn.addEventListener('click', () => {
+                this.installApp();
+            });
+        }
         
-        document.getElementById('close-install-banner').addEventListener('click', () => {
-            document.getElementById('install-banner').classList.add('hidden');
-            localStorage.setItem('installBannerClosed', 'true');
-        });
+        const closeInstallBannerBtn = document.getElementById('close-install-banner');
+        if (closeInstallBannerBtn) {
+            closeInstallBannerBtn.addEventListener('click', () => {
+                const installBanner = document.getElementById('install-banner');
+                if (installBanner) {
+                    installBanner.classList.add('hidden');
+                }
+                localStorage.setItem('installBannerClosed', 'true');
+            });
+        }
         
         // 온라인 상태 변경 감지
         window.addEventListener('online', () => {
@@ -186,8 +257,9 @@ class App {
         const isInstalled = window.matchMedia('(display-mode: standalone)').matches;
         const isBannerClosed = localStorage.getItem('installBannerClosed') === 'true';
         
-        if (isInstalled || isBannerClosed) {
-            document.getElementById('install-banner').classList.add('hidden');
+        const installBanner = document.getElementById('install-banner');
+        if (installBanner && (isInstalled || isBannerClosed)) {
+            installBanner.classList.add('hidden');
         }
     }
     
@@ -195,9 +267,10 @@ class App {
     showInstallBanner() {
         const isInstalled = window.matchMedia('(display-mode: standalone)').matches;
         const isBannerClosed = localStorage.getItem('installBannerClosed') === 'true';
+        const installBanner = document.getElementById('install-banner');
         
-        if (!isInstalled && !isBannerClosed && this.deferredPrompt) {
-            document.getElementById('install-banner').classList.remove('hidden');
+        if (installBanner && !isInstalled && !isBannerClosed && this.deferredPrompt) {
+            installBanner.classList.remove('hidden');
         }
     }
     
@@ -209,7 +282,10 @@ class App {
         this.deferredPrompt.userChoice.then((choiceResult) => {
             if (choiceResult.outcome === 'accepted') {
                 console.log('사용자가 앱 설치를 수락했습니다.');
-                document.getElementById('install-banner').classList.add('hidden');
+                const installBanner = document.getElementById('install-banner');
+                if (installBanner) {
+                    installBanner.classList.add('hidden');
+                }
             }
             this.deferredPrompt = null;
         });
@@ -218,6 +294,7 @@ class App {
     // 온라인 상태 업데이트
     updateOnlineStatus() {
         const statusEl = document.getElementById('connection-status');
+        if (!statusEl) return;
         
         if (this.isOnline) {
             statusEl.textContent = '온라인';
