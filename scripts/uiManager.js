@@ -24,6 +24,10 @@ export class UIManager {
         this.goStopDialog = document.getElementById('go-stop-dialog');
         this.currentPointsElement = document.getElementById('current-points');
         this.countdownElement = document.getElementById('countdown-timer');
+        this.helpMessageElement = document.getElementById('help-message');
+        this.specialEffectElement = document.getElementById('special-effect');
+        this.playerCollectedArea = document.getElementById('player-collected-area');
+        this.aiCollectedArea = document.getElementById('ai-collected-area');
         
         // 게임 매니저 이벤트 연결
         this.initGameEvents();
@@ -59,10 +63,21 @@ export class UIManager {
     
     // 특수 효과 표시 (쪽, 따닥 등)
     showSpecialEffect(action) {
-        // 간단한 구현: 알림으로 표시
-        if (action) {
-            alert(action.message);
+        if (!action || !this.specialEffectElement) return;
+        
+        // 특수 효과 메시지 설정
+        const specialMessage = document.getElementById('special-message');
+        if (specialMessage) {
+            specialMessage.textContent = action.message;
         }
+        
+        // 특수 효과 화면 표시
+        this.specialEffectElement.classList.remove('hidden');
+        
+        // 잠시 후 숨기기
+        setTimeout(() => {
+            this.specialEffectElement.classList.add('hidden');
+        }, 2000);
     }
     
     // 화면 전환
@@ -123,9 +138,26 @@ export class UIManager {
                 this.renderGameBoard(data.state);
                 
                 // 특수 효과 (쪽, 따닥 등) 표시
-                if (data.lastAction) {
-                    this.showSpecialEffect(data.lastAction);
+                if (data.collectionInfo && data.collectionInfo.specialAction) {
+                    this.showSpecialEffect(data.collectionInfo.specialAction);
                 }
+                
+                // 카드 수집 애니메이션
+                if (data.collectionInfo && data.collectionInfo.cardsCollected && data.collectionInfo.cardsCollected.length > 0) {
+                    const targetArea = data.player === 'player' ? this.playerCollectedArea : this.aiCollectedArea;
+                    const cardType = data.collectionInfo.cardsCollected[0].type;
+                    
+                    // 수집 영역 내의 특정 타입 컨테이너 찾기
+                    const typeContainer = targetArea ? targetArea.querySelector(`.${cardType}-container`) : null;
+                    
+                    if (targetArea && typeContainer) {
+                        this.animateCardCollection(data.playedCard, typeContainer, cardType);
+                    }
+                }
+            };
+            
+            this.gameManager.onNoMatchingCards = (data) => {
+                this.enableCardDiscard();
             };
             
             this.gameManager.onGoStopPrompt = (data) => {
@@ -149,6 +181,12 @@ export class UIManager {
                     this.gameStatusElement.textContent = '당신의 차례';
                 }
                 this.enablePlayerCards(true);
+                
+                // 턴 표시기 활성화
+                const turnIndicator = document.getElementById('turn-indicator');
+                if (turnIndicator) {
+                    turnIndicator.classList.remove('hidden');
+                }
                 break;
                 
             case 'aiTurn':
@@ -156,6 +194,12 @@ export class UIManager {
                     this.gameStatusElement.textContent = 'AI 차례';
                 }
                 this.enablePlayerCards(false);
+                
+                // 턴 표시기 비활성화
+                const aiTurnIndicator = document.getElementById('turn-indicator');
+                if (aiTurnIndicator) {
+                    aiTurnIndicator.classList.add('hidden');
+                }
                 break;
                 
             case 'goStop':
@@ -194,6 +238,15 @@ export class UIManager {
         
         // AI 카드 렌더링 (뒷면만 표시)
         this.renderAICards(state.aiCards.length);
+        
+        // 수집 카드 렌더링 (추가)
+        this.renderCollectedCards(state.playerCollected, state.aiCollected);
+        
+        // 매칭 카드가 없으면 카드 버리기 모드 활성화 (추가)
+        if (state.phase === 'playerTurn' && state.selectedCard && 
+            (!state.matchingCards || state.matchingCards.length === 0)) {
+            this.enableCardDiscard();
+        }
     }
     
     // 바닥 카드 렌더링
@@ -351,6 +404,23 @@ export class UIManager {
                 cardElement.classList.add('highlight');
             }
         });
+        
+        // 매칭되는 카드가 없을 경우
+        if (state.matchingCards.length === 0) {
+            // 바닥에 버릴 수 있음을 표시
+            this.boardCardsElement.classList.add('discard-highlight');
+            
+            // 도움말 메시지 표시
+            if (this.helpMessageElement) {
+                this.helpMessageElement.textContent = '매칭되는 카드가 없습니다. 카드를 바닥에 버려주세요.';
+                this.helpMessageElement.classList.remove('hidden');
+                
+                // 잠시 후 메시지 숨기기
+                setTimeout(() => {
+                    this.helpMessageElement.classList.add('hidden');
+                }, 3000);
+            }
+        }
     }
     
     // AI 카드 하이라이트 (AI 턴에 사용)
@@ -416,5 +486,238 @@ export class UIManager {
                 this.gameManager.selectGoStop('stop');
             };
         }
+    }
+    
+    // 카드 수집 영역 렌더링
+    renderCollectedCards(playerCollected, aiCollected) {
+        // 플레이어 수집 카드 영역 DOM 요소
+        const playerCollectedArea = document.getElementById('player-collected-area');
+        const aiCollectedArea = document.getElementById('ai-collected-area');
+        
+        if (!playerCollectedArea || !aiCollectedArea) return;
+        
+        // 플레이어 수집 카드 영역 초기화 및 렌더링
+        playerCollectedArea.innerHTML = '';
+        
+        // 수집 카드 타입별로 컨테이너 생성
+        const playerCollectionTypes = {
+            'kwang': document.createElement('div'),
+            'animal': document.createElement('div'),
+            'ribbon': document.createElement('div'),
+            'junk': document.createElement('div')
+        };
+        
+        // 타입별 컨테이너 설정
+        Object.keys(playerCollectionTypes).forEach(type => {
+            const container = playerCollectionTypes[type];
+            container.className = `collection-container ${type}-container`;
+            
+            // 타입 레이블 추가
+            const label = document.createElement('div');
+            label.className = 'collection-label';
+            label.textContent = this.getCollectionTypeName(type);
+            container.appendChild(label);
+            
+            // 카드 컨테이너 추가
+            const cardsContainer = document.createElement('div');
+            cardsContainer.className = 'collection-cards';
+            
+            // 수집된 카드 추가
+            playerCollected[type].forEach(card => {
+                const cardElement = this.createMiniCardElement(card);
+                cardsContainer.appendChild(cardElement);
+            });
+            
+            container.appendChild(cardsContainer);
+            playerCollectedArea.appendChild(container);
+        });
+        
+        // AI 수집 카드 영역 초기화 및 렌더링 (유사한 로직)
+        aiCollectedArea.innerHTML = '';
+        
+        const aiCollectionTypes = {
+            'kwang': document.createElement('div'),
+            'animal': document.createElement('div'),
+            'ribbon': document.createElement('div'),
+            'junk': document.createElement('div')
+        };
+        
+        Object.keys(aiCollectionTypes).forEach(type => {
+            const container = aiCollectionTypes[type];
+            container.className = `collection-container ${type}-container`;
+            
+            const label = document.createElement('div');
+            label.className = 'collection-label';
+            label.textContent = this.getCollectionTypeName(type);
+            container.appendChild(label);
+            
+            const cardsContainer = document.createElement('div');
+            cardsContainer.className = 'collection-cards';
+            
+            aiCollected[type].forEach(card => {
+                const cardElement = this.createMiniCardElement(card);
+                cardsContainer.appendChild(cardElement);
+            });
+            
+            container.appendChild(cardsContainer);
+            aiCollectedArea.appendChild(container);
+        });
+    }
+    
+    // 수집 카드 미니 카드 요소 생성
+    createMiniCardElement(card) {
+        if (!card) return document.createElement('div');
+        
+        const cardElement = document.createElement('div');
+        cardElement.className = 'mini-card';
+        cardElement.dataset.id = card.id;
+        cardElement.dataset.month = card.month;
+        cardElement.dataset.type = card.type;
+        
+        // 월 표시 (간소화된 형태)
+        const monthElement = document.createElement('div');
+        monthElement.className = 'mini-card-month';
+        monthElement.textContent = `${card.month}`;
+        cardElement.appendChild(monthElement);
+        
+        return cardElement;
+    }
+    
+    // 수집 타입 이름 가져오기
+    getCollectionTypeName(type) {
+        switch(type) {
+            case 'kwang': return '광';
+            case 'animal': return '띠';
+            case 'ribbon': return '열끗';
+            case 'junk': return '피';
+            default: return type;
+        }
+    }
+    
+    // 카드 수집 애니메이션 효과
+    animateCardCollection(sourceCard, targetArea, cardType) {
+        // 카드 요소 찾기
+        const cardElements = document.querySelectorAll('.card');
+        let sourceCardElement = null;
+        
+        for (const element of cardElements) {
+            if (element.dataset.id === sourceCard.id) {
+                sourceCardElement = element;
+                break;
+            }
+        }
+        
+        if (!sourceCardElement || !targetArea) return;
+        
+        // 원본 카드의 위치 정보
+        const sourceRect = sourceCardElement.getBoundingClientRect();
+        
+        // 대상 영역의 위치 정보
+        const targetRect = targetArea.getBoundingClientRect();
+        
+        // 임시 카드 요소 생성 (애니메이션용)
+        const tempCard = sourceCardElement.cloneNode(true);
+        tempCard.style.position = 'fixed';
+        tempCard.style.left = `${sourceRect.left}px`;
+        tempCard.style.top = `${sourceRect.top}px`;
+        tempCard.style.width = `${sourceRect.width}px`;
+        tempCard.style.height = `${sourceRect.height}px`;
+        tempCard.style.zIndex = '1000';
+        tempCard.style.transition = 'all 0.5s ease-out';
+        
+        // body에 임시 카드 추가
+        document.body.appendChild(tempCard);
+        
+        // 애니메이션을 위한 지연
+        setTimeout(() => {
+            // 대상 위치로 이동 및 크기 조절
+            tempCard.style.left = `${targetRect.left + 10}px`;
+            tempCard.style.top = `${targetRect.top + 10}px`;
+            tempCard.style.width = '30px';  // 미니 카드 크기로 축소
+            tempCard.style.height = '45px';
+            tempCard.style.opacity = '0.8';
+            
+            // 애니메이션 완료 후 임시 카드 제거
+            setTimeout(() => {
+                document.body.removeChild(tempCard);
+                
+                // 수집 영역 업데이트
+                const state = this.gameManager.getCurrentState();
+                this.renderCollectedCards(state.playerCollected, state.aiCollected);
+                
+                // 효과 표시
+                const collectionEffect = document.getElementById('collection-effect');
+                if (collectionEffect) {
+                    collectionEffect.classList.remove('hidden');
+                    setTimeout(() => {
+                        collectionEffect.classList.add('hidden');
+                    }, 1000);
+                }
+            }, 500);
+        }, 10);
+    }
+    
+    // 패 버리기 기능 구현을 위한 메서드
+    enableCardDiscard() {
+        if (!this.playerCardsElement) return;
+        
+        const state = this.gameManager.getCurrentState();
+        
+        // 플레이어 턴이 아니거나 매칭 카드가 있으면 무시
+        if (state.phase !== 'playerTurn' || (state.matchingCards && state.matchingCards.length > 0)) return;
+        
+        // 선택된 카드가 있다면 버리기 모드 활성화
+        if (this.selectedCardIndex !== -1) {
+            // 바닥 영역 하이라이트 (카드를 버릴 수 있는 영역)
+            if (this.boardCardsElement) {
+                this.boardCardsElement.classList.add('discard-highlight');
+            }
+            
+            // 상태 표시 업데이트
+            if (this.gameStatusElement) {
+                this.gameStatusElement.textContent = '카드를 버려주세요';
+            }
+            
+            // 도움말 메시지 표시
+            if (this.helpMessageElement) {
+                this.helpMessageElement.textContent = '매칭되는 카드가 없습니다. 카드를 바닥에 버려주세요.';
+                this.helpMessageElement.classList.remove('hidden');
+                
+                // 잠시 후 메시지 숨기기
+                setTimeout(() => {
+                    this.helpMessageElement.classList.add('hidden');
+                }, 3000);
+            }
+            
+            // 바닥 영역 클릭 이벤트 추가
+            if (this.boardCardsElement) {
+                this.boardCardsElement.onclick = () => {
+                    this.discardSelectedCard();
+                };
+            }
+        }
+    }
+    
+    // 카드 버리기 실행
+    discardSelectedCard() {
+        if (this.selectedCardIndex === -1 || !this.gameManager) return;
+        
+        const state = this.gameManager.getCurrentState();
+        
+        // 플레이어 턴이 아니면 무시
+        if (state.phase !== 'playerTurn') return;
+        
+        // 게임 매니저에게 카드 버리기 전달
+        this.gameManager.discardCard(this.selectedCardIndex);
+        
+        // 바닥 영역 하이라이트 제거
+        if (this.boardCardsElement) {
+            this.boardCardsElement.classList.remove('discard-highlight');
+            // 클릭 이벤트 제거
+            this.boardCardsElement.onclick = null;
+        }
+        
+        // 선택 초기화
+        this.selectedCardIndex = -1;
     }
 }
