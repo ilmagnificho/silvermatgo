@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <!-- 로고 배경 원 -->
+  <circle cx="100" cy="100" r="95" fill="#0A4428" stroke="#FFD700" stroke-width="5"/>
+  
+  <!-- 카드 배경 -->
+  <rect x="60" y="50" width="80" height="120" rx="10" fill="#FFFFFF" stroke="#FFD700" stroke-width="3"/>
+  
+  <!-- 텍스트 "맞고" -->
+  <text x="100" y="135" font-family="Arial, 'Noto Sans KR'" font-size="36" font-weight="bold" fill="#D32F2F" text-anchor="middle">맞고</text>
+  
+  <!-- 텍스트 "실버" -->
+  <text x="100" y="95" font-family="Arial, 'Noto Sans KR'" font-size="24" font-weight="bold" fill="#444444" text-anchor="middle">실버</text>
+  
+  <!-- 장식 화투 카드 패턴 (상단) -->
+  <rect x="75" y="60" width="50" height="15" rx="3" fill="#F5F5F5" stroke="#D32F2F" stroke-width="1"/>
+  <rect x="80" y="65" width="40" height="5" rx="1" fill="#D32F2F"/>
+  
+  <!-- 장식 화투 카드 패턴 (하단) -->
+  <rect x="75" y="145" width="50" height="15" rx="3" fill="#F5F5F5" stroke="#4CAF50" stroke-width="1"/>
+  <rect x="80" y="150" width="40" height="5" rx="1" fill="#4CAF50"/>
+  
+  <!-- 상단 왼쪽 카드 -->
+  <g transform="translate(30, 30) rotate(-15)">
+    <rect x="0" y="0" width="40" height="60" rx="5" fill="#FFFFFF" stroke="#FFD700" stroke-width="2"/>
+    <text x="20" y="20" font-family="Arial" font-size="14" font-weight="bold" fill="#D32F2F" text-anchor="middle">1</text>
+    <text x="20" y="40" font-family="Arial" font-size="10" fill="#D32F2F" text-anchor="middle">소나무</text>
+  </g>
+  
+  <!-- 상단 오른쪽 카드 -->
+  <g transform="translate(130, 30) rotate(15)">
+    <rect x="0" y="0" width="40" height="60" rx="5" fill="#FFFFFF" stroke="#FFD700" stroke-width="2"/>
+    <text x="20" y="20" font-family="Arial" font-size="14" font-weight="bold" fill="#4CAF50" text-anchor="middle">8</text>
+    <text x="20" y="40" font-family="Arial" font-size="10" fill="#4CAF50" text-anchor="middle">공산</text>
+  </g>
+  
+  <!-- 장식적 효과: 빛나는 별 (광) -->
+  <g transform="translate(100, 25)">
+    <path d="M0,-10 L2,-3 L9,-3 L4,1 L6,8 L0,4 L-6,8 L-4,1 L-9,-3 L-2,-3 Z" fill="#FFD700"/>
+  </g>
+  
+  <!-- 장식적 효과: 띠 -->
+  <path d="M30,180 Q100,160 170,180" stroke="#FFD700" stroke-width="3" fill="none"/>
+</svg>

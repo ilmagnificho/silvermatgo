@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <!-- 배경 -->
+  <rect width="400" height="300" fill="#0E5334" rx="10"/>
+  <rect x="10" y="10" width="380" height="280" fill="#0A4428" rx="5" stroke="#FFD700" stroke-width="2"/>
+  
+  <!-- 제목 -->
+  <text x="200" y="40" font-family="Arial, 'Noto Sans KR'" font-size="24" font-weight="bold" fill="#FFFFFF" text-anchor="middle">카드 선택 방법</text>
+  
+  <!-- 게임 보드 설명 -->
+  <g transform="translate(50, 70)">
+    <!-- 바닥 카드 영역 -->
+    <rect x="0" y="0" width="300" height="120" rx="5" fill="#074023" stroke="#FFFFFF" stroke-width="1" stroke-dasharray="5,5"/>
+    <text x="150" y="-10" font-family="Arial, 'Noto Sans KR'" font-size="14" fill="#FFFFFF" text-anchor="middle">바닥 카드</text>
+    
+    <!-- 바닥 카드들 -->
+    <rect x="40" y="20" width="50" height="80" rx="5" fill="#FFFFFF" stroke="#FFD700" stroke-width="2"/>
+    <text x="65" y="50" font-family="Arial" font-size="18" font-weight="bold" fill="#D32F2F" text-anchor="middle">2</text>
+    <text x="65" y="70" font-family="Arial" font-size="12" fill="#D32F2F" text-anchor="middle">매화</text>
+    
+    <rect x="125" y="20" width="50" height="80" rx="5" fill="#FFFFFF" stroke="#FFD700" stroke-width="2"/>
+    <text x="150" y="50" font-family="Arial" font-size="18" font-weight="bold" fill="#4CAF50" text-anchor="middle">4</text>
+    <text x="150" y="70" font-family="Arial" font-size="12" fill="#4CAF50" text-anchor="middle">등나무</text>
+    
+    <rect x="210" y="20" width="50" height="80" rx="5" fill="#FFFFFF" stroke="#FFD700" stroke-width="2"/>
+    <text x="235" y="50" font-family="Arial" font-size="18" font-weight="bold" fill="#2196F3" text-anchor="middle">7</text>
+    <text x="235" y="70" font-family="Arial" font-size="12" fill="#2196F3" text-anchor="middle">싸리</text>
+    
+    <!-- 내 카드 영역 -->
+    <rect x="40" y="150" width="220" height="100" rx="5" fill="#074023" stroke="#FFFFFF" stroke-width="1" stroke-dasharray="5,5"/>
+    <text x="150" y="140" font-family="Arial, 'Noto Sans KR'" font-size="14" fill="#FFFFFF" text-anchor="middle">내 카드</text>
+    
+    <!-- 내 카드들 (마지막 카드가 선택됨) -->
+    <rect x="50" y="160" width="40" height="65" rx="5" fill="#FFFFFF" stroke="#FFD700" stroke-width="2"/>
+    <text x="70" y="190" font-family="Arial" font-size="16" font-weight="bold" fill="#D32F2F" text-anchor="middle">3</text>
+    <text x="70" y="205" font-family="Arial" font-size="10" fill="#D32F2F" text-anchor="middle">벚꽃</text>
+    
+    <rect x="100" y="160" width="40" height="65" rx="5" fill="#FFFFFF" stroke="#FFD700" stroke-width="2"/>
+    <text x="120" y="190" font-family="Arial" font-size="16" font-weight="bold" fill="#4CAF50" text-anchor="middle">5</text>
+    <text x="120" y="205" font-family="Arial" font-size="10" fill="#4CAF50" text-anchor="middle">난초</text>
+    
+    <rect x="150" y="160" width="40" height="65" rx="5" fill="#FFFFFF" stroke="#FFD700" stroke-width="2"/>
+    <text x="170" y="190" font-family="Arial" font-size="16" font-weight="bold" fill="#9C27B0" text-anchor="middle">6</text>
+    <text x="170" y="205" font-family="Arial" font-size="10" fill="#9C27B0" text-anchor="middle">모란</text>
+    
+    <!-- 선택된 카드 (위로 올라와 있음) -->
+    <rect x="200" y="150" width="40" height="65" rx="5" fill="#FFFFFF" stroke="#FFD700" stroke-width="4"/>
+    <text x="220" y="180" font-family="Arial" font-size="16" font-weight="bold" fill="#D32F2F" text-anchor="middle">2</text>
+    <text x="220" y="195" font-family="Arial" font-size="10" fill="#D32F2F" text-anchor="middle">매화</text>
+    
+    <!-- 설명 텍스트 -->
+    <text x="300" y="75" font-family="Arial, 'Noto Sans KR'" font-size="12" fill="#FFFFFF" text-anchor="middle">같은 월의</text>
+    <text x="300" y="90" font-family="Arial, 'Noto Sans KR'" font-size="12" fill="#FFFFFF" text-anchor="middle">카드와</text>
+    <text x="300" y="105" font-family="Arial, 'Noto Sans KR'" font-size="12" fill="#FFFFFF" text-anchor="middle">매칭됨</text>
+    
+    <!-- 선택된 카드와 매칭되는 바닥 카드 강조 -->
+    <rect x="40" y="20" width="50" height="80" rx="5" fill="none" stroke="#FFD700" stroke-width="4" stroke-opacity="0.7"/>
+    
+    <!-- 화살표 (선택된 카드에서 매칭되는 바닥 카드로) -->
+    <path d="M220,150 C220,120 150,120 90,90" fill="none" stroke="#FFD700" stroke-width="3" stroke-dasharray="5,5" marker-end="url(#arrowhead)"/>
+    
+    <!-- 화살표 마커 정의 -->
+    <defs>
+      <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+        <polygon points="0 0, 10 3.5, 0 7" fill="#FFD700"/>
+      </marker>
+    </defs>
+  </g>
+  
+  <!-- 설명 텍스트 -->
+  <text x="30" y="275" font-family="Arial, 'Noto Sans KR'" font-size="12" fill="#90EE90">터치: 먼저 내 카드를 선택하고, 같은 월의 바닥 카드를 선택하세요!</text>
+</svg>

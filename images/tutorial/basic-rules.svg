@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <!-- 배경 -->
+  <rect width="400" height="300" fill="#0E5334" rx="10"/>
+  <rect x="10" y="10" width="380" height="280" fill="#0A4428" rx="5" stroke="#FFD700" stroke-width="2"/>
+  
+  <!-- 제목 -->
+  <text x="200" y="40" font-family="Arial, 'Noto Sans KR'" font-size="24" font-weight="bold" fill="#FFFFFF" text-anchor="middle">기본 규칙</text>
+  
+  <!-- 기본 설명 텍스트 -->
+  <text x="30" y="70" font-family="Arial, 'Noto Sans KR'" font-size="14" fill="#FFFFFF">화투 48장을 이용하여 같은 달의 카드를 모아 점수를 획득합니다.</text>
+  
+  <!-- 카드 섹션 -->
+  <g transform="translate(30, 90)">
+    <!-- 카드 타입 설명 -->
+    <text x="0" y="0" font-family="Arial, 'Noto Sans KR'" font-size="16" font-weight="bold" fill="#FFD700">카드 종류:</text>
+    
+    <!-- 광 -->
+    <rect x="0" y="10" width="50" height="80" rx="5" fill="#FFFFFF" stroke="#FFD700" stroke-width="2"/>
+    <text x="25" y="40" font-family="Arial" font-size="18" font-weight="bold" fill="#D32F2F" text-anchor="middle">1</text>
+    <text x="25" y="60" font-family="Arial" font-size="12" fill="#D32F2F" text-anchor="middle">소나무</text>
+    <text x="25" y="100" font-family="Arial, 'Noto Sans KR'" font-size="12" fill="#FFFFFF" text-anchor="middle">광(⭐)</text>
+    
+    <!-- 띠 -->
+    <rect x="70" y="10" width="50" height="80" rx="5" fill="#FFFFFF" stroke="#FFD700" stroke-width="2"/>
+    <text x="95" y="40" font-family="Arial" font-size="18" font-weight="bold" fill="#4CAF50" text-anchor="middle">5</text>
+    <text x="95" y="60" font-family="Arial" font-size="12" fill="#4CAF50" text-anchor="middle">난초</text>
+    <text x="95" y="100" font-family="Arial, 'Noto Sans KR'" font-size="12" fill="#FFFFFF" text-anchor="middle">띠(동물)</text>
+    
+    <!-- 열끗 -->
+    <rect x="140" y="10" width="50" height="80" rx="5" fill="#FFFFFF" stroke="#FFD700" stroke-width="2"/>
+    <text x="165" y="40" font-family="Arial" font-size="18" font-weight="bold" fill="#2196F3" text-anchor="middle">7</text>
+    <text x="165" y="60" font-family="Arial" font-size="12" fill="#2196F3" text-anchor="middle">싸리</text>
+    <text x="165" y="100" font-family="Arial, 'Noto Sans KR'" font-size="12" fill="#FFFFFF" text-anchor="middle">열끗(리본)</text>
+    
+    <!-- 피 -->
+    <rect x="210" y="10" width="50" height="80" rx="5" fill="#FFFFFF" stroke="#FFD700" stroke-width="2"/>
+    <text x="235" y="40" font-family="Arial" font-size="18" font-weight="bold" fill="#9C27B0" text-anchor="middle">12</text>
+    <text x="235" y="60" font-family="Arial" font-size="12" fill="#9C27B0" text-anchor="middle">비</text>
+    <text x="235" y="100" font-family="Arial, 'Noto Sans KR'" font-size="12" fill="#FFFFFF" text-anchor="middle">피</text>
+  </g>
+  
+  <!-- 점수 계산 섹션 -->
+  <g transform="translate(30, 190)">
+    <text x="0" y="0" font-family="Arial, 'Noto Sans KR'" font-size="16" font-weight="bold" fill="#FFD700">점수 계산:</text>
+    
+    <text x="0" y="25" font-family="Arial, 'Noto Sans KR'" font-size="14" fill="#FFFFFF">- 광 3장: 3점</text>
+    <text x="0" y="45" font-family="Arial, 'Noto Sans KR'" font-size="14" fill="#FFFFFF">- 띠 5장: 1점 (5장마다 1점)</text>
+    <text x="0" y="65" font-family="Arial, 'Noto Sans KR'" font-size="14" fill="#FFFFFF">- 열끗 5장: 1점 (5장마다 1점)</text>
+    <text x="0" y="85" font-family="Arial, 'Noto Sans KR'" font-size="14" fill="#FFFFFF">- 피 10장: 1점 (10장마다 1점)</text>
+    
+    <text x="200" y="25" font-family="Arial, 'Noto Sans KR'" font-size="14" fill="#FFFFFF">- 기본 승리 조건: 7점</text>
+    <text x="200" y="45" font-family="Arial, 'Noto Sans KR'" font-size="14" fill="#FFFFFF">- 고/스톱: 점수 획득 시 선택</text>
+    <text x="200" y="65" font-family="Arial, 'Noto Sans KR'" font-size="14" fill="#FFFFFF">- 피박: 상대방보다 피를 많이</text>
+    <text x="200" y="85" font-family="Arial, 'Noto Sans KR'" font-size="14" fill="#FFFFFF">  모으면 1점 추가</text>
+  </g>
+</svg>
